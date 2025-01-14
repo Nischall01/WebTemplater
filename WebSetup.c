@@ -14,7 +14,7 @@
 #define CREATE_DIR(name) mkdir(name, 0700)
 #endif
 
-#define MAX_TEXT_LENGTH 150
+#define MAX_TEXT_LENGTH 1024
 
 char _dirName[MAX_TEXT_LENGTH] = "";
 
@@ -72,34 +72,61 @@ void create_dir() {
 void create_a_file(char *_fileName, int type) {
   char fileName[MAX_TEXT_LENGTH] = "";
   char templateTextBuffer[MAX_TEXT_LENGTH] = "";
+  FILE *fptr;
+  FILE *file;
 
-  strncpy(fileName, _fileName, MAX_TEXT_LENGTH - 1);
-  fileName[MAX_TEXT_LENGTH - 1] = '\0';
+  snprintf(fileName, sizeof(fileName), "%s", _fileName);
 
   switch (type) {
   case 0:
     strncat(fileName, ".html", MAX_TEXT_LENGTH - strlen(fileName) - 1);
+    fptr = fopen("Templates/html.html", "r");
+    if (!fptr) {
+      printf("Error opening template file html.html\n");
+      return;
+    }
+    fread(templateTextBuffer, sizeof(char), MAX_TEXT_LENGTH - 1, fptr);
+    fclose(fptr);
     break;
   case 1:
     strncat(fileName, ".css", MAX_TEXT_LENGTH - strlen(fileName) - 1);
+    fptr = fopen("Templates/css.css", "r");
+    if (!fptr) {
+      printf("Error opening template file css.css\n");
+      return;
+    }
+    fread(templateTextBuffer, sizeof(char), MAX_TEXT_LENGTH - 1, fptr);
+    fclose(fptr);
     break;
   case 2:
     strncat(fileName, ".js", MAX_TEXT_LENGTH - strlen(fileName) - 1);
+    fptr = fopen("Templates/js.js", "r");
+    if (!fptr) {
+      printf("Error opening template file js.js\n");
+      return;
+    }
+    fread(templateTextBuffer, sizeof(char), MAX_TEXT_LENGTH - 1, fptr);
+    fclose(fptr);
     break;
   default:
     printf("Error: Unknown file type.\n");
     return;
   }
 
-  FILE *file = fopen(fileName, "w");
+  file = fopen(fileName, "w");
   if (file == NULL) {
     printf("Error creating file %s\n", fileName);
     return;
   }
-  fprintf(file, "Some text");
-  fclose(file);
 
-  return;
+  if (fprintf(file, "%s", templateTextBuffer) < 0) {
+    printf("Error writing to file %s\n", fileName);
+    fclose(file);
+    return;
+  }
+
+  fclose(file);
+  printf("File %s created successfully.\n", fileName);
 }
 
 void create_files(bool newDirCreated) {
