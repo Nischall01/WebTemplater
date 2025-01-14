@@ -17,9 +17,6 @@
 #define MAX_TEXT_LENGTH 150
 
 char _dirName[MAX_TEXT_LENGTH] = "";
-char _dirPath[MAX_TEXT_LENGTH];
-char _currrentDirPath[MAX_TEXT_LENGTH];
-char _bufferText[MAX_TEXT_LENGTH];
 
 void cls() { system("cls"); }
 void new_line() { printf("\n"); }
