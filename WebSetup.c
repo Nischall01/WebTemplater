@@ -1,0 +1,127 @@
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+// For Windows
+#if defined(_WIN32)
+#include <direct.h>
+#define CREATE_DIR(name) _mkdir(name)
+// For Unix/Linux, macOS
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+#define CREATE_DIR(name) mkdir(name, 0700)
+#endif
+
+#define MAX_TEXT_LENGTH 150
+
+char _dirName[MAX_TEXT_LENGTH] = "";
+char _dirPath[MAX_TEXT_LENGTH];
+char _currrentDirPath[MAX_TEXT_LENGTH];
+char _bufferText[MAX_TEXT_LENGTH];
+
+void cls() { system("cls"); }
+void new_line() { printf("\n"); }
+
+void create_dir();
+void create_files(bool newDirCreated);
+void create_a_file(char *_fileName, int type);
+void get_current_dir();
+
+int main(int argc, char *argv[]) {
+  char wtd;
+
+  while (1) {
+    bool exit = false;
+    printf("Do you want to create a folder or not? y/n\n");
+    scanf(" %c", &wtd);
+    cls();
+    switch (wtd) {
+    case 'y':
+      create_dir();
+      new_line();
+      create_files(true);
+      exit = true;
+      break;
+    case 'n':
+      create_files(false);
+      exit = true;
+      break;
+    default:
+      cls();
+      printf("Please enter either 'y' or 'n'\n");
+      break;
+    }
+    if (exit) {
+      break;
+    }
+  }
+  return 0;
+}
+
+void create_dir() {
+  printf("Name the folder: \n");
+  scanf("%s", _dirName);
+  if (CREATE_DIR(_dirName) == 0) {
+    printf("Folder '%s' created successfully.\n", _dirName);
+  } else {
+    printf("Error occured when trying to create the folder.\n");
+    return;
+  }
+  return;
+}
+
+void create_a_file(char *_fileName, int type) {
+  char fileName[MAX_TEXT_LENGTH] = "";
+  char templateTextBuffer[MAX_TEXT_LENGTH] = "";
+
+  strncpy(fileName, _fileName, MAX_TEXT_LENGTH - 1);
+  fileName[MAX_TEXT_LENGTH - 1] = '\0';
+
+  switch (type) {
+  case 0:
+    strncat(fileName, ".html", MAX_TEXT_LENGTH - strlen(fileName) - 1);
+    break;
+  case 1:
+    strncat(fileName, ".css", MAX_TEXT_LENGTH - strlen(fileName) - 1);
+    break;
+  case 2:
+    strncat(fileName, ".js", MAX_TEXT_LENGTH - strlen(fileName) - 1);
+    break;
+  default:
+    printf("Error: Unknown file type.\n");
+    return;
+  }
+
+  FILE *file = fopen(fileName, "w");
+  if (file == NULL) {
+    printf("Error creating file %s\n", fileName);
+    return;
+  }
+  fprintf(file, "Some text");
+  fclose(file);
+
+  return;
+}
+
+void create_files(bool newDirCreated) {
+  char fileName[MAX_TEXT_LENGTH];
+  char temp[MAX_TEXT_LENGTH];
+  const char *fileTypes[] = {"HTML", "CSS", "JS"};
+
+  if (newDirCreated && _dirName[strlen(_dirName) - 1] != '/') {
+    strncat(_dirName, "/", MAX_TEXT_LENGTH - strlen(_dirName) - 1);
+  }
+
+  for (int i = 0; i < 3; i++) {
+    printf("Enter the %s filename: \n", fileTypes[i]);
+    scanf("%s", temp);
+
+    snprintf(fileName, MAX_TEXT_LENGTH, "%s%s", _dirName, temp);
+    fileName[MAX_TEXT_LENGTH - 1] = '\0';
+
+    create_a_file(fileName, i);
+    new_line();
+  }
+}
