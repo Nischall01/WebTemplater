@@ -25,7 +25,6 @@ void new_line() { printf("\n"); }
 void create_dir();
 void create_files(bool newDirCreated);
 void create_a_file(char *_fileName, int type);
-void get_current_dir_path();
 
 int main(int argc, char *argv[]) {
   char wtd;
@@ -150,4 +149,3 @@ void create_files(bool newDirCreated) {
     new_line();
   }
 }
-void get_current_dir_path() {}
