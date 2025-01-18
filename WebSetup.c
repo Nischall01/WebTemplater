@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 // For Windows
 #if defined(_WIN32)
 #include <direct.h>
@@ -16,7 +15,9 @@
 
 #define MAX_TEXT_LENGTH 1024
 
+// Global Variables
 char _dirName[MAX_TEXT_LENGTH] = "";
+char _currentDirPath[MAX_TEXT_LENGTH] = "";
 
 void cls() { system("cls"); }
 void new_line() { printf("\n"); }
@@ -24,15 +25,14 @@ void new_line() { printf("\n"); }
 void create_dir();
 void create_files(bool newDirCreated);
 void create_a_file(char *_fileName, int type);
-void get_current_dir();
+void get_current_dir_path();
 
 int main(int argc, char *argv[]) {
   char wtd;
-
   while (1) {
     bool exit = false;
     printf("Do you want to create a folder or not? y/n\n");
-    scanf(" %c", &wtd);
+    scanf_s(" %c", &wtd);
     cls();
     switch (wtd) {
     case 'y':
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 
 void create_dir() {
   printf("Name the folder: \n");
-  scanf("%s", _dirName);
+  scanf_s("%s", _dirName);
   if (CREATE_DIR(_dirName) == 0) {
     printf("Folder '%s' created successfully.\n", _dirName);
   } else {
@@ -72,49 +72,43 @@ void create_dir() {
 void create_a_file(char *_fileName, int type) {
   char fileName[MAX_TEXT_LENGTH] = "";
   char templateTextBuffer[MAX_TEXT_LENGTH] = "";
-  FILE *fptr;
-  FILE *file;
+  FILE *fptr = NULL;
+  FILE *file = NULL;
 
   snprintf(fileName, sizeof(fileName), "%s", _fileName);
 
   switch (type) {
   case 0:
-    strncat(fileName, ".html", MAX_TEXT_LENGTH - strlen(fileName) - 1);
-    fptr = fopen("Templates/html.html", "r");
-    if (!fptr) {
+    strncat_s(fileName, MAX_TEXT_LENGTH, ".html", 5);
+    if (fopen_s(&fptr, "Templates/html.html", "r") != 0) {
       printf("Error opening template file html.html\n");
       return;
     }
-    fread(templateTextBuffer, sizeof(char), MAX_TEXT_LENGTH - 1, fptr);
-    fclose(fptr);
     break;
   case 1:
-    strncat(fileName, ".css", MAX_TEXT_LENGTH - strlen(fileName) - 1);
-    fptr = fopen("Templates/css.css", "r");
-    if (!fptr) {
+    strncat_s(fileName, MAX_TEXT_LENGTH, ".css", 4);
+    if (fopen_s(&fptr, "Templates/css.css", "r") != 0) {
       printf("Error opening template file css.css\n");
       return;
     }
-    fread(templateTextBuffer, sizeof(char), MAX_TEXT_LENGTH - 1, fptr);
-    fclose(fptr);
     break;
   case 2:
-    strncat(fileName, ".js", MAX_TEXT_LENGTH - strlen(fileName) - 1);
-    fptr = fopen("Templates/js.js", "r");
-    if (!fptr) {
+    strncat_s(fileName, MAX_TEXT_LENGTH, ".js", 3);
+    if (fopen_s(&fptr, "Templates/js.js", "r") != 0) {
       printf("Error opening template file js.js\n");
       return;
     }
-    fread(templateTextBuffer, sizeof(char), MAX_TEXT_LENGTH - 1, fptr);
-    fclose(fptr);
     break;
   default:
     printf("Error: Unknown file type.\n");
     return;
   }
 
-  file = fopen(fileName, "w");
-  if (file == NULL) {
+  size_t bytesRead = fread(templateTextBuffer, 1, MAX_TEXT_LENGTH - 1, fptr);
+  templateTextBuffer[bytesRead] = '\0';
+  fclose(fptr);
+
+  if (fopen_s(&file, fileName, "w") != 0) {
     printf("Error creating file %s\n", fileName);
     return;
   }
@@ -133,19 +127,27 @@ void create_files(bool newDirCreated) {
   char fileName[MAX_TEXT_LENGTH];
   char temp[MAX_TEXT_LENGTH];
   const char *fileTypes[] = {"HTML", "CSS", "JS"};
-
   if (newDirCreated && _dirName[strlen(_dirName) - 1] != '/') {
-    strncat(_dirName, "/", MAX_TEXT_LENGTH - strlen(_dirName) - 1);
+    strncat_s(_dirName, MAX_TEXT_LENGTH, "/", 1);
   }
-
   for (int i = 0; i < 3; i++) {
     printf("Enter the %s filename: \n", fileTypes[i]);
-    scanf("%s", temp);
+    scanf_s("%s", temp, (unsigned)sizeof(temp));
+    // Initialize fileName with dirName
+    if (strcpy_s(fileName, MAX_TEXT_LENGTH, _dirName) != 0) {
 
-    snprintf(fileName, MAX_TEXT_LENGTH, "%s%s", _dirName, temp);
-    fileName[MAX_TEXT_LENGTH - 1] = '\0';
+      printf("Error: Failed to copy directory name\n");
+      continue;
+    }
+
+    // Append temp to fileName
+    if (strncat_s(fileName, MAX_TEXT_LENGTH, temp, strlen(temp)) != 0) {
+      printf("Error: Failed to append filename\n");
+      continue;
+    }
 
     create_a_file(fileName, i);
     new_line();
   }
 }
+void get_current_dir_path() {}
