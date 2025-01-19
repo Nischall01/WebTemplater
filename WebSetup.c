@@ -1,10 +1,14 @@
+#include <corecrt.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
+#include <wchar.h>
 // For Windows
 #if defined(_WIN32)
 #include <direct.h>
+#include <windows.h>
 #define CREATE_DIR(name) _mkdir(name)
 // For Unix/Linux, macOS
 #else
@@ -17,17 +21,23 @@
 
 // Global Variables
 char _dirName[MAX_TEXT_LENGTH] = "";
-char _currentDirPath[MAX_TEXT_LENGTH] = "";
+char _executableDirPath[MAX_TEXT_LENGTH] = "";
+char _templateDirPath[MAX_TEXT_LENGTH] = "";
 
 void cls() { system("cls"); }
 void new_line() { printf("\n"); }
 
-void create_dir();
+void create_dir(bool useCurrentDateInDirName);
 void create_files(bool newDirCreated);
 void create_a_file(char *_fileName, int type);
 void update_html_references(const char *, const char *, const char *);
+char *get_current_date();
+char *get_executable_dir_path();
+void init_executable_and_template_dir_path();
 
 int main(int argc, char *argv[]) {
+  cls();
+  init_executable_and_template_dir_path();
   char wtd;
   while (1) {
     bool exit = false;
@@ -36,7 +46,19 @@ int main(int argc, char *argv[]) {
     cls();
     switch (wtd) {
     case 'y':
-      create_dir();
+      printf("Do you want to use current date in the folder name? y/n\n");
+      scanf_s(" %c", &wtd);
+      switch (wtd) {
+      case 'y':
+        create_dir(true);
+        break;
+      case 'n':
+        create_dir(false);
+        break;
+      default:
+        create_dir(false);
+        break;
+      }
       new_line();
       create_files(true);
       exit = true;
@@ -57,13 +79,24 @@ int main(int argc, char *argv[]) {
   return 0;
 }
 
-void create_dir() {
+void create_dir(bool useCurrentDateInDirName) {
   printf("Name the folder: \n");
-  scanf_s("%s", _dirName);
+  scanf_s("%s", _dirName, (unsigned int)sizeof(_dirName));
+  if (useCurrentDateInDirName) {
+    char *currentDate = get_current_date();
+    if (currentDate) {
+      char tempDirName[MAX_TEXT_LENGTH] = "";
+      snprintf(tempDirName, sizeof(tempDirName), "%s %s", currentDate,
+               _dirName);
+      strncpy_s(_dirName, sizeof(_dirName), tempDirName, _TRUNCATE);
+    } else {
+      printf("Failed to get the current date.\n");
+    }
+  }
   if (CREATE_DIR(_dirName) == 0) {
     printf("Folder '%s' created successfully.\n", _dirName);
   } else {
-    printf("Error occured when trying to create the folder.\n");
+    perror("Error creating folder");
     return;
   }
   return;
@@ -77,24 +110,40 @@ void create_a_file(char *_fileName, int type) {
 
   snprintf(fileName, sizeof(fileName), "%s", _fileName);
 
+  char templateFileBuffer[MAX_TEXT_LENGTH] = "";
+  strncpy_s(templateFileBuffer, sizeof(templateFileBuffer), _templateDirPath,
+            _TRUNCATE);
+
   switch (type) {
   case 0:
     strncat_s(fileName, MAX_TEXT_LENGTH, ".html", 5);
-    if (fopen_s(&fptr, "Templates/html.html", "r") != 0) {
+
+    // Stringing the templates directory and html template
+    strncat_s(templateFileBuffer, MAX_TEXT_LENGTH, "html.html", 9);
+
+    if (fopen_s(&fptr, templateFileBuffer, "r") != 0) {
       printf("Error opening template file html.html\n");
       return;
     }
     break;
   case 1:
     strncat_s(fileName, MAX_TEXT_LENGTH, ".css", 4);
-    if (fopen_s(&fptr, "Templates/css.css", "r") != 0) {
+
+    // Stringing the templates directory and css template
+    strncat_s(templateFileBuffer, MAX_TEXT_LENGTH, "css.css", 7);
+
+    if (fopen_s(&fptr, templateFileBuffer, "r") != 0) {
       printf("Error opening template file css.css\n");
       return;
     }
     break;
   case 2:
     strncat_s(fileName, MAX_TEXT_LENGTH, ".js", 3);
-    if (fopen_s(&fptr, "Templates/js.js", "r") != 0) {
+
+    // Stringing the templates directory and js template
+    strncat_s(templateFileBuffer, MAX_TEXT_LENGTH, "js.js", 5);
+
+    if (fopen_s(&fptr, templateFileBuffer, "r") != 0) {
       printf("Error opening template file js.js\n");
       return;
     }
@@ -188,14 +237,6 @@ void update_html_references(const char *htmlFileName, const char *cssFileName,
   char title[MAX_TEXT_LENGTH] = "";
   char cssLink[MAX_TEXT_LENGTH] = "";
   char jsScript[MAX_TEXT_LENGTH] = "";
-  char jQScript[MAX_TEXT_LENGTH] =
-      "  <script "
-      "src=\"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/"
-      "jquery.min.js\" "
-      "integrity=\"sha512-v2CJ7UaYy4JwqLDIrZUI/"
-      "4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/"
-      "g==\" crossorigin =\"anonymous\" referrerpolicy=\"no-referrer\" "
-      "></script>\n";
 
   // Extract just the filenames without the directory path
   const char *cssBaseFileName =
@@ -241,11 +282,6 @@ void update_html_references(const char *htmlFileName, const char *cssFileName,
   strncat_s(newContent, sizeof(newContent), title, strlen(title));
   // Add CSS link
   strncat_s(newContent, sizeof(newContent), cssLink, strlen(cssLink));
-
-  // Add jQuery link
-  // NOTE: Make this optional
-  strncat_s(newContent, sizeof(newContent), jQScript, strlen(jQScript));
-
   // Add everything up to body closing tag
   strncat_s(newContent, sizeof(newContent), headPos,
             bodyInsertPos - headInsertPos);
@@ -269,4 +305,65 @@ void update_html_references(const char *htmlFileName, const char *cssFileName,
 
   fclose(htmlFile);
   printf("Successfully updated HTML file with CSS and JS references\n");
+}
+
+char *get_current_date() {
+  static char dateStr[11]; // "YYYY-MM-DD" + null terminator
+  time_t t = time(NULL);   // Get current time
+  struct tm tm;
+
+  // Use localtime_s in a thread-safe manner
+  if (localtime_s(&tm, &t) != 0) {
+    return NULL;
+  }
+
+  // Format the date as "YYYY-MM-DD"
+  snprintf(dateStr, sizeof(dateStr), "%04d-%02d-%02d", tm.tm_year + 1900,
+           tm.tm_mon + 1, tm.tm_mday);
+
+  return dateStr;
+}
+
+// Function to get the directory of the executable
+char *get_executable_dir_path() {
+  static char dir[1024];
+
+#if defined(_WIN32)
+  // Windows: Use GetModuleFileName to get the executable path
+  DWORD result = GetModuleFileName(NULL, dir, sizeof(dir));
+  if (result == 0) {
+    return "Error retrieving executable path.";
+  }
+
+  // Get the directory from the path
+  char *lastBackslash = strrchr(dir, '\\');
+  if (lastBackslash != NULL) {
+    *lastBackslash =
+        '\0'; // Null-terminate at the last backslash to get the directory
+  }
+
+#else
+  // Unix/Linux/macOS: Use readlink("/proc/self/exe") on Linux or argv[0] for
+  // other Unix-like systems
+  ssize_t len = readlink("/proc/self/exe", dir, sizeof(dir) - 1);
+  if (len == -1) {
+    return "Error retrieving executable path.";
+  }
+  dir[len] = '\0';
+
+  // Get the directory from the path
+  char *dirName = dirname(dir);
+  strncpy(dir, dirName, sizeof(dir) - 1);
+#endif
+
+  return dir;
+}
+
+void init_executable_and_template_dir_path() {
+  char *executableDirPath = get_executable_dir_path();
+  strncpy_s(_executableDirPath, sizeof(_executableDirPath), executableDirPath,
+            _TRUNCATE);
+  strncat_s(_templateDirPath, MAX_TEXT_LENGTH, _executableDirPath, _TRUNCATE);
+  strncat_s(_templateDirPath, MAX_TEXT_LENGTH, "/Templates/", _TRUNCATE);
+  return;
 }
