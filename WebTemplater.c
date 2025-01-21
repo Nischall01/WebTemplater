@@ -5,6 +5,7 @@
  * management
  */
 
+#include "MyFunctions/userinput.c"
 #include <corecrt.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -48,51 +49,22 @@ char *get_current_date(void);              // Gets formatted current date
 char *get_executable_dir_path(void);       // Gets executable directory path
 void init_executable_and_template_dir_path(void); // Initializes path variables
 
-char *get_user_input(void) {
-  static char _inputBuffer[MAX_TEXT_LENGTH] = ""; // User input buffer
-
-  // Read the input into buffer
-  if (fgets(_inputBuffer, sizeof(_inputBuffer), stdin) == NULL) {
-    printf("Error reading input.\n");
-    return NULL;
-  }
-
-  // Remove trailing newline if present
-  size_t len = strlen(_inputBuffer);
-  if (len > 0 && _inputBuffer[len - 1] == '\n') {
-    _inputBuffer[len - 1] = '\0';
-  }
-  // Check if input might have been too long (buffer full without newline)
-  else if (len == sizeof(_inputBuffer) - 1) {
-    printf("Warning: Input may have been truncated.\n");
-    // Clear input buffer to prevent overflow on next read
-    int c;
-    while ((c = getchar()) != '\n' && c != EOF)
-      ;
-  }
-
-  return _inputBuffer;
-}
-
 int main(int argc, char *argv[]) {
   cls();
   init_executable_and_template_dir_path();
 
-  char *wtd = ""; // User choice variable
+  char wtd[2] = ""; // User choice variable
   while (1) {
     bool exit = false;
 
     // Main menu prompt
     printf("Do you want to create a folder or not? y/n\n");
     /* scanf_s(" %c", &wtd); */
-    wtd = get_user_input();
-    if (strlen(wtd) > 1) {
+    if (get_user_input_text_single_char(wtd, MAX_TEXT_LENGTH) == NULL) {
       cls();
       printf("Please enter either 'y' or 'n'\n");
       continue;
     }
-
-    cls();
 
     // Subfolder creation with optional date prefix
     switch (wtd[0]) {
@@ -100,14 +72,11 @@ int main(int argc, char *argv[]) {
       while (1) {
         printf("Do you want to use current date in the folder name? y/n\n");
         /* scanf_s(" %c", &wtd); */
-        wtd = get_user_input();
-        if (strlen(wtd) > 1) {
+        if (get_user_input_text_single_char(wtd, MAX_TEXT_LENGTH) == NULL) {
           cls();
           printf("Please enter either 'y' or 'n'\n");
           continue;
         }
-
-        cls();
 
         switch (wtd[0]) {
         case 'y':
@@ -150,7 +119,8 @@ int main(int argc, char *argv[]) {
 // Creates a directory with optional date prefix
 int create_dir(bool useCurrentDateInDirName) {
   printf("Name the folder: \n");
-  scanf_s("%s", _dirName, (unsigned int)sizeof(_dirName));
+  get_user_input_text_alphabet_only(_dirName, sizeof(_dirName));
+  /* scanf_s("%s", _dirName, (unsigned int)sizeof(_dirName)); */
 
   // Add date prefix if requested
   if (useCurrentDateInDirName) {
@@ -250,7 +220,8 @@ void create_files(bool newDirCreated) {
   // Create each file type (HTML, CSS, JS)
   for (int i = 0; i < 3; i++) {
     printf("Enter the %s filename: \n", fileTypes[i]);
-    scanf_s("%s", temp, (unsigned)sizeof(temp));
+    /* scanf_s("%s", temp, (unsigned)sizeof(temp)); */
+    get_user_input_text_alphabet_only(temp, sizeof(temp));
 
     // Build full file path with directory
     if (strcpy_s(fileName, MAX_TEXT_LENGTH, _dirName) != 0) {
