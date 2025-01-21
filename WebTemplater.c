@@ -1,12 +1,13 @@
 /*
  * WebTemplater
  * This program creates a basic web project structure with HTML, CSS, and JS
- * files It supports both Windows and Unix-like systems and includes template
+ * files. It supports both Windows and Unix-like systems and includes template
  * management
  */
 
 #include <corecrt.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -26,7 +27,7 @@
 #endif
 
 // Maximum length for text buffers
-#define MAX_TEXT_LENGTH 1024
+#define MAX_TEXT_LENGTH 2048
 
 // Global variables for path management
 char _dirName[MAX_TEXT_LENGTH] = "";           // Current working directory name
@@ -34,67 +35,111 @@ char _executableDirPath[MAX_TEXT_LENGTH] = ""; // Path to executable
 char _templateDirPath[MAX_TEXT_LENGTH] = "";   // Path to template files
 
 // Utility functions
-void cls() { system("cls"); }     // Clear screen
-void new_line() { printf("\n"); } // Print newline
+void cls(void) { system("cls"); }     // Clear screen
+void new_line(void) { printf("\n"); } // Print newline
 
 // Function declarations
 int create_dir(bool useCurrentDateInDirName);  // Creates project directory
 void create_files(bool newDirCreated);         // Creates web files
 void create_a_file(char *_fileName, int type); // Creates individual file
 void update_html_references(const char *, const char *,
-                            const char *);    // Updates HTML with CSS/JS links
-char *get_current_date();                     // Gets formatted current date
-char *get_executable_dir_path();              // Gets executable directory path
-void init_executable_and_template_dir_path(); // Initializes path variables
+                            const char *); // Updates HTML with CSS/JS links
+char *get_current_date(void);              // Gets formatted current date
+char *get_executable_dir_path(void);       // Gets executable directory path
+void init_executable_and_template_dir_path(void); // Initializes path variables
+
+char *get_user_input(void) {
+  static char _inputBuffer[MAX_TEXT_LENGTH] = ""; // User input buffer
+
+  // Read the input into buffer
+  if (fgets(_inputBuffer, sizeof(_inputBuffer), stdin) == NULL) {
+    printf("Error reading input.\n");
+    return NULL;
+  }
+
+  // Remove trailing newline if present
+  size_t len = strlen(_inputBuffer);
+  if (len > 0 && _inputBuffer[len - 1] == '\n') {
+    _inputBuffer[len - 1] = '\0';
+  }
+  // Check if input might have been too long (buffer full without newline)
+  else if (len == sizeof(_inputBuffer) - 1) {
+    printf("Warning: Input may have been truncated.\n");
+    // Clear input buffer to prevent overflow on next read
+    int c;
+    while ((c = getchar()) != '\n' && c != EOF)
+      ;
+  }
+
+  return _inputBuffer;
+}
 
 int main(int argc, char *argv[]) {
   cls();
   init_executable_and_template_dir_path();
 
-  char wtd; // User choice variable
+  char *wtd = ""; // User choice variable
   while (1) {
     bool exit = false;
 
     // Main menu prompt
     printf("Do you want to create a folder or not? y/n\n");
-    scanf_s(" %c", &wtd);
-    cls();
-
-    switch (wtd) {
-    case 'y':
-      // Subfolder creation with optional date prefix
-      printf("Do you want to use current date in the folder name? y/n\n");
-      scanf_s(" %c", &wtd);
-      switch (wtd) {
-      case 'y':
-        if (create_dir(true) != 0) {
-          exit = true;
-        }
-        break;
-      case 'n':
-      default:
-        if (create_dir(false) != 0) {
-          exit = true;
-        }
-        break;
-      }
-      if (exit)
-        break;
-      new_line();
-      create_files(true);
-      exit = true;
-      break;
-
-    case 'n':
-      // Create files in current directory
-      create_files(false);
-      exit = true;
-      break;
-
-    default:
+    /* scanf_s(" %c", &wtd); */
+    wtd = get_user_input();
+    if (strlen(wtd) > 1) {
       cls();
       printf("Please enter either 'y' or 'n'\n");
-      break;
+      continue;
+    }
+
+    cls();
+
+    // Subfolder creation with optional date prefix
+    switch (wtd[0]) {
+    case 'y':
+      while (1) {
+        printf("Do you want to use current date in the folder name? y/n\n");
+        /* scanf_s(" %c", &wtd); */
+        wtd = get_user_input();
+        if (strlen(wtd) > 1) {
+          cls();
+          printf("Please enter either 'y' or 'n'\n");
+          continue;
+        }
+
+        cls();
+
+        switch (wtd[0]) {
+        case 'y':
+          if (create_dir(true) != 0) {
+            exit = true;
+          }
+          break;
+        case 'n':
+        default:
+          if (create_dir(false) != 0) {
+            exit = true;
+          }
+          break;
+        }
+        if (exit)
+          break;
+        new_line();
+        create_files(true);
+        exit = true;
+        break;
+
+      case 'n':
+        // Create files in current directory
+        create_files(false);
+        exit = true;
+        break;
+
+      default:
+        cls();
+        printf("Please enter either 'y' or 'n'\n");
+        break;
+      }
     }
     if (exit)
       break;
@@ -339,7 +384,7 @@ char *get_current_date() {
 }
 
 // Returns the directory path of the executable
-char *get_executable_dir_path() {
+char *get_executable_dir_path(void) {
   static char dir[1024];
 
 #if defined(_WIN32)
@@ -372,7 +417,7 @@ char *get_executable_dir_path() {
 }
 
 // Initializes paths for executable and template directories
-void init_executable_and_template_dir_path() {
+void init_executable_and_template_dir_path(void) {
   // Get and store executable path
   char *executableDirPath = get_executable_dir_path();
   strncpy_s(_executableDirPath, sizeof(_executableDirPath), executableDirPath,
