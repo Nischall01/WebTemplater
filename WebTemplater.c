@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
     /* scanf_s(" %c", &wtd); */
     if (get_user_input_text_single_char(wtd, MAX_TEXT_LENGTH) == NULL) {
       cls();
-      printf("Please enter either 'y' or 'n'\n");
+      printf("Invalid Input. Please enter either 'y' or 'n'\n");
       continue;
     }
 
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
         /* scanf_s(" %c", &wtd); */
         if (get_user_input_text_single_char(wtd, MAX_TEXT_LENGTH) == NULL) {
           cls();
-          printf("Please enter either 'y' or 'n'\n");
+          printf("Invald Input. Please enter either 'y' or 'n'\n");
           continue;
         }
 
