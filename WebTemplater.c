@@ -337,7 +337,7 @@ void update_html_references(const char *htmlFileName, const char *cssFileName,
 }
 
 // Returns current date in YYYY-MM-DD format
-char *get_current_date() {
+char *get_current_date(void) {
   static char dateStr[11]; // "YYYY-MM-DD" + null terminator
   time_t t = time(NULL);   // Get current time
   struct tm tm;
