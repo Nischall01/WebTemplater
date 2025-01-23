@@ -11,7 +11,7 @@ WebTemplater is a basic CLI program designed to quickly set up a barebones web d
 
 ## Installation
 
-You can download the latest release and simply extract, add to path and use WebTemplater, it will be named *wt.exe* in the release version.
+You can download the [latest release](https://github.com/Nischall01/WebTemplater/releases/latest) and simply extract, add to path and use WebTemplater, it will be named *wt.exe* in the release version.
 
 Or,
 
