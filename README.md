@@ -1,5 +1,53 @@
 # WebTemplater
 
-WebTemplater is a basic CLI program to quickly set up a lightweight web development project structure.
-It creates a folder with optional date-based naming, generates HTML, CSS, and JS files using predefined (and modifiable) templates, and automatically links the files.
-Perfect for beginners or quick prototyping!
+WebTemplater is a basic CLI program designed to quickly set up a lightweight web development project structure. It creates a folder with optional date-based naming, generates HTML, CSS, and JavaScript files using predefined (and modifiable) templates, and automatically links the files. This tool is perfect for beginners or for quick prototyping!
+
+## Features
+
+- **Quick Setup**: Easily create a new web project with a predefined structure.
+- **Template Generation**: Automatically generate HTML, CSS, and JavaScript files from customizable templates.
+- **Date-Based Naming**: Optionally create project folders with date-based naming for better organization.
+- **File Linking**: Automatically link generated files for immediate use.
+
+## Installation
+
+You can download the latest release and simply extract, add to path and use WebTemplater, it will be named *wt.exe* in the release version.
+
+Or,
+
+To build WebTemplater yourself, follow these steps:
+
+1. Clone the repository:
+
+   ```pwsh
+   git clone https://github.com/Nischall01/WebTemplater.git
+   ```
+
+2. Navigate to the project directory and then to the *src* directory
+
+   ```pwsh
+   cd WebTemplater/src
+   ```
+
+3. Use a compiler of your choice to compile the src files
+
+   ```pwsh
+   gcc -o wt WebTemplater.c userinput.c 
+   ```
+
+> [!NOTE]
+> The *Templates* directory and the executable must be in the same parent directory for the program to function. *Add the directory to path* to use it from any location in your system.
+
+## How to use
+
+After installing WebTemplater and [*adding the directory to the path*](https://www.eukhost.com/kb/how-to-add-to-the-path-on-windows-10-and-windows-11/), simply call "wt" in your terminal to use the program.
+
+> [!Note]
+> You can modify each template to your liking but in the html template ```<head>``` and ```<body>``` are required and do not rename the templates.
+
+## Screenshots
+
+![Screenshot 1](./media/screenshots/Screenshot%201.png)
+![Screenshot 1](./media/screenshots/Screenshot%202.png)
+![Screenshot 1](./media/screenshots/Screenshot%203.png)
+![Screenshot 1](./media/screenshots/Screenshot%204.png)

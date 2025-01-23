@@ -1,15 +1,10 @@
+#include "../include/userinput.h"
 #include <ctype.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
 
-// Function Declarations
-bool valid_char_input(char *);
-char *get_user_input_text(char *, size_t);
-char *get_user_input_text_single_char(char *, size_t);
-char *get_user_input_text_alphabet_only(char *, size_t);
-
-// Function Definations
+// Validates if the input is a single character.
 bool valid_char_input(char *input) {
   size_t len = strlen(input);
   if (len != 1)
@@ -17,20 +12,21 @@ bool valid_char_input(char *input) {
   return true;
 }
 
+// Reads a line of user input text into the provided buffer.
 char *get_user_input_text(char *buffer, size_t buffer_size) {
   if (!buffer || buffer_size == 0) {
-    return NULL;
+    return NULL; // Return NULL if buffer is NULL or size is zero
   }
 
   // Read the input into buffer
   if (fgets(buffer, buffer_size, stdin) == NULL) {
-    return NULL;
+    return NULL; // Return NULL if reading fails
   }
 
   // Remove trailing newline if present
   size_t len = strlen(buffer);
   if (len > 0 && buffer[len - 1] == '\n') {
-    buffer[len - 1] = '\0';
+    buffer[len - 1] = '\0'; // Replace newline with null terminator
     len--;
   }
   // Check for potential buffer overflow
@@ -42,23 +38,24 @@ char *get_user_input_text(char *buffer, size_t buffer_size) {
     return NULL; // Return NULL to indicate error
   }
 
-  return buffer;
+  return buffer; // Return the buffer containing the input text
 }
 
+// Reads a single character of user input into the provided buffer.
 char *get_user_input_text_single_char(char *buffer, size_t buffer_size) {
   if (!buffer || buffer_size == 0) {
-    return NULL;
+    return NULL; // Return NULL if buffer is NULL or size is zero
   }
 
   // Read the input into buffer
   if (fgets(buffer, buffer_size, stdin) == NULL) {
-    return NULL;
+    return NULL; // Return NULL if reading fails
   }
 
   // Remove trailing newline if present
   size_t len = strlen(buffer);
   if (len > 0 && buffer[len - 1] == '\n') {
-    buffer[len - 1] = '\0';
+    buffer[len - 1] = '\0'; // Replace newline with null terminator
     len--;
   }
   // Check for potential buffer overflow
@@ -70,27 +67,30 @@ char *get_user_input_text_single_char(char *buffer, size_t buffer_size) {
     return NULL; // Return NULL to indicate error
   }
 
+  // Validate that the input is a single character
   if (!valid_char_input(buffer)) {
-    return NULL;
+    return NULL; // Return NULL if input is not a single character
   }
 
-  return buffer;
+  return buffer; // Return the buffer containing the valid input character
 }
 
+// Reads user input text that contains only alphabetic characters into the
+// provided buffer.
 char *get_user_input_text_alphabet_only(char *buffer, size_t buffer_size) {
   if (!buffer || buffer_size == 0) {
-    return NULL;
+    return NULL; // Return NULL if buffer is NULL or size is zero
   }
 
   // Read the input into buffer
   if (fgets(buffer, buffer_size, stdin) == NULL) {
-    return NULL;
+    return NULL; // Return NULL if reading fails
   }
 
   // Remove trailing newline if present
   size_t len = strlen(buffer);
   if (len > 0 && buffer[len - 1] == '\n') {
-    buffer[len - 1] = '\0';
+    buffer[len - 1] = '\0'; // Replace newline with null terminator
     len--;
   }
   // Check for potential buffer overflow
@@ -102,12 +102,12 @@ char *get_user_input_text_alphabet_only(char *buffer, size_t buffer_size) {
     return NULL; // Return NULL to indicate error
   }
 
-  // Validate only alphabetic characters
+  // Validate that all characters are alphabetic
   for (size_t i = 0; i < len; i++) {
     if (!isalpha((unsigned char)buffer[i])) {
-      return NULL; // Non-alphabetic character found
+      return NULL; // Return NULL if a non-alphabetic character is found
     }
   }
 
-  return buffer;
+  return buffer; // Return the buffer containing the valid alphabetic input
 }

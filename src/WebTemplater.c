@@ -5,7 +5,7 @@
  * management
  */
 
-#include "MyFunctions/userinput.c"
+#include "../include/userinput.h"
 #include <corecrt.h>
 #include <stdbool.h>
 #include <stddef.h>
