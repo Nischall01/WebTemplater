@@ -1,6 +1,6 @@
 # WebTemplater
 
-WebTemplater is a basic CLI program designed to quickly set up a lightweight web development project structure. It creates a folder with optional date-based naming, generates HTML, CSS, and JavaScript files using predefined (and modifiable) templates, and automatically links the files. This tool is perfect for beginners or for quick prototyping!
+WebTemplater is a basic CLI program designed to quickly set up a barebones web development project structure. It creates a folder with optional date-based naming, generates HTML, CSS, and JavaScript files using predefined (and modifiable) templates, and automatically links the files. This tool is perfect for beginners or for quick prototyping!
 
 ## Features
 
