@@ -43,7 +43,7 @@ To build WebTemplater yourself, follow these steps:
 After installing WebTemplater and [*adding the directory to the path*](https://www.eukhost.com/kb/how-to-add-to-the-path-on-windows-10-and-windows-11/), simply call "wt" in your terminal to use the program.
 
 > [!Note]
-> You can modify each template to your liking but in the html template ```<head>``` and ```<body>``` are required and do not rename the templates.
+> You can modify each template to your liking. However, in the HTML template, the `<head>` and `<body>` tags are required for the program to function correctly. Do not rename the template files.
 
 ## Screenshots
 
